@@ -1014,6 +1014,19 @@
     // INITIALIZATION
     // ============================================
     
+    // Helper to get image name - use stored names if available, otherwise extract from path
+    function getImageName(image, poll) {
+      if (poll && poll.imageNames) {
+        const idx = poll.images.indexOf(image);
+        if (idx !== -1 && poll.imageNames[idx]) {
+          return poll.imageNames[idx];
+        }
+      }
+      // Fallback: extract from path/URL, limit length for base64 URLs
+      const extracted = image.split('/').pop().split('.')[0];
+      return extracted.length > 30 ? extracted.substring(0, 30) + '...' : extracted;
+    }
+    
     async function init() {
       // Check if we're viewing shared results
       const urlParams = new URLSearchParams(window.location.search);
@@ -1135,7 +1148,7 @@
       }
 
       const currentImage = state.roundImages[state.currentIndex];
-      const imageName = currentImage.split('/').pop().split('.')[0];
+      const imageName = getImageName(currentImage, state.currentPoll);
 
       container.innerHTML = `
         <div class="design-card" id="current-card" data-image="${currentImage}">
@@ -1307,7 +1320,12 @@
       }
 
       try {
-        const results = JSON.parse(atob(encodedResults));
+        const compactResults = JSON.parse(atob(encodedResults));
+        // Convert indices back to full image paths
+        const results = compactResults.map(r => ({
+          image: poll.images[r.i],
+          eliminatedRound: r.r
+        }));
         renderResults(poll, results, true);
         switchView('results-view');
       } catch (error) {
@@ -1346,7 +1364,7 @@
       const hasRealWinner = maxRound > minRound; // Only have winners if there were multiple rounds
       
       document.getElementById('ranking-list').innerHTML = sortedResults.map((result, index) => {
-        const imageName = result.image.split('/').pop().split('.')[0];
+        const imageName = getImageName(result.image, poll);
         const positionClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'other';
         
         let badge = '';
@@ -1371,9 +1389,14 @@
         `;
       }).join('');
 
-      // Share URL
-      const shareData = btoa(JSON.stringify(sortedResults));
-      const shareUrl = `${window.location.origin}${window.location.pathname}?poll=${poll.id}&results=${shareData}`;
+      // Share URL - use indices instead of full image paths to keep URL small
+      const shareResults = sortedResults.map(r => ({
+        i: poll.images.indexOf(r.image),
+        r: r.eliminatedRound || 1
+      }));
+      const shareData = btoa(JSON.stringify(shareResults));
+      const origin = window.location.origin !== 'null' ? window.location.origin : '';
+      const shareUrl = `${origin}${window.location.pathname}?poll=${poll.id}&results=${shareData}`;
       document.getElementById('share-url').textContent = shareUrl;
       document.getElementById('btn-copy').textContent = 'Copy Link';
       document.getElementById('btn-copy').classList.remove('copied');

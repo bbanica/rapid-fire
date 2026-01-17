@@ -306,12 +306,12 @@
       margin-bottom: 20px;
     }
 
-    .success-content a {
+    .success-content a:not(.btn-cta) {
       color: var(--accent);
       text-decoration: none;
     }
 
-    .success-content a:hover {
+    .success-content a:not(.btn-cta):hover {
       text-decoration: underline;
     }
 
@@ -320,7 +320,7 @@
       width: 100%;
       padding: 14px 24px;
       background: var(--accent);
-      color: #fff;
+      color: #fff !important;
       border: none;
       border-radius: var(--radius-md);
       font-size: 16px;
@@ -335,6 +335,7 @@
     .btn-cta:hover {
       background: var(--accent-hover);
       text-decoration: none;
+      color: #fff !important;
     }
 
     .btn-secondary {
@@ -572,7 +573,8 @@
             name: title,
             backgroundColor: backgroundColor,
             thumbnail: imageData[0].data,
-            images: imageData.map(img => img.data)
+            images: imageData.map(img => img.data),
+            imageNames: imageData.map(img => img.name.replace(/\.[^/.]+$/, '')) // Store original names without extension
           }]
         };
 
@@ -583,42 +585,29 @@
           throw new Error('Missing index.html');
         }
 
-        // Inject the manifest directly into the HTML
+        // Inject the manifest in head
         const manifestScript = `
-    <script>
-      // Embedded manifest - no fetch needed
-      window.EMBEDDED_MANIFEST = ${JSON.stringify(manifest)};
-    </script>
+    <script>window.EMBEDDED_MANIFEST = ${JSON.stringify(manifest)};<\/script>
+    <style>.btn-back, .btn-create { visibility: hidden !important; }</style>
   </head>`;
         
         appHtml = appHtml.replace('</head>', manifestScript);
-
-        // Modify the loadPolls function to use embedded manifest
-        const loadPollsOverride = `
-    async function loadPolls() {
-      try {
-        if (window.EMBEDDED_MANIFEST) {
-          state.polls = window.EMBEDDED_MANIFEST.polls || [];
-          // Hide create button in standalone polls
-          const createBtn = document.querySelector('.btn-create');
-          if (createBtn) createBtn.style.display = 'none';
-        } else {
-          const response = await fetch(MANIFEST_PATH);
-          if (!response.ok) throw new Error('Manifest not found');
-          const manifest = await response.json();
-          state.polls = manifest.polls || [];
-        }
-        renderPollsGrid();
-      } catch (error) {
-        console.error('Error loading polls:', error);
-        renderEmptyState();
-      }
-    }`;
-
-        // Replace the existing loadPolls function
+        
+        // Replace init(); call with direct startup (at this point ALL functions are defined)
         appHtml = appHtml.replace(
-          /async function loadPolls\(\) \{[\s\S]*?renderEmptyState\(\);\s*\}\s*\}/,
-          loadPollsOverride
+          'init();',
+          `// Standalone poll startup
+    (function() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var sharedResults = urlParams.get('results');
+      var sharedPollId = urlParams.get('poll');
+      state.polls = window.EMBEDDED_MANIFEST.polls;
+      if (sharedResults && sharedPollId) {
+        showSharedResults(sharedPollId, sharedResults);
+      } else {
+        openPoll(state.polls[0].id);
+      }
+    })();`
         );
 
         // Create blob and download

@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Rapid Fire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-card: rgba(28, 28, 30, 0.8);
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-tertiary: rgba(255, 255, 255, 0.4);
+      --accent: #0a84ff;
+      --accent-hover: #409cff;
+      --success: #30d158;
+      --danger: #ff453a;
+      --warning: #ffd60a;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --transition-fast: 0.15s ease;
+      --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* App Container */
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--transition-medium), transform var(--transition-medium);
+    }
+
+    .view.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Header */
+    .header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, var(--bg-primary) 0%, transparent 100%);
+      position: relative;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .btn-back {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .btn-back:hover {
+      opacity: 0.7;
+    }
+
+    .btn-back svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Library View */
+    .library-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px 40px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .library-header {
+      padding: 40px 0 24px;
+    }
+
+    .library-title {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .library-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 300px;
+    }
+
+    .btn-create {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 600;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .btn-create:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-create:active {
+      transform: scale(0.98);
+    }
+
+    .polls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .poll-card {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+      position: relative;
+    }
+
+    .poll-card:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-card);
+    }
+
+    .poll-card:active {
+      transform: scale(0.98);
+    }
+
+    .poll-thumbnail {
+      width: 100%;
+      height: 65%;
+      object-fit: cover;
+      background: var(--bg-secondary);
+    }
+
+    .poll-info {
+      padding: 10px 12px;
+      height: 35%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .poll-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .poll-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .poll-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--success);
+      color: #000;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 20px;
+    }
+
+    /* Voting View */
+    .voting-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .round-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .round-pill {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .round-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .progress-bar {
+      width: 100%;
+      max-width: 300px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width var(--transition-medium);
+    }
+
+    .card-container {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 3/4;
+      perspective: 1000px;
+    }
+
+    .design-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition-medium), opacity var(--transition-medium);
+      user-select: none;
+      touch-action: pan-y;
+    }
+
+    .design-card:active {
+      cursor: default;
+    }
+
+    .design-card.swiping-left {
+      transform: translateX(-150%) rotate(-15deg);
+      opacity: 0;
+    }
+
+    .design-card.swiping-right {
+      transform: translateX(150%) rotate(15deg);
+      opacity: 0;
+    }
+
+    .design-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--card-bg, var(--bg-secondary));
+      pointer-events: none;
+    }
+
+    .card-label {
+      position: absolute;
+      top: 20px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .card-label.pass {
+      left: 20px;
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .card-label.keep {
+      right: 20px;
+      background: var(--success);
+      color: #000;
+    }
+
+    .design-card.tilting-left .card-label.pass,
+    .design-card.tilting-right .card-label.keep {
+      opacity: 1;
+    }
+
+    .card-index {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .vote-buttons {
+      display: flex;
+      gap: 40px;
+      margin-top: 32px;
+    }
+
+    .vote-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .vote-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .vote-btn:active {
+      transform: scale(0.95);
+    }
+
+    .vote-btn.pass {
+      background: linear-gradient(135deg, #ff6b6b, var(--danger));
+      box-shadow: 0 4px 20px rgba(255, 69, 58, 0.4);
+    }
+
+    .vote-btn.keep {
+      background: linear-gradient(135deg, #5eff7e, var(--success));
+      box-shadow: 0 4px 20px rgba(48, 209, 88, 0.4);
+    }
+
+    .vote-btn svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .vote-btn.pass svg {
+      color: #fff;
+    }
+
+    .vote-btn.keep svg {
+      color: #000;
+    }
+
+    /* Results View */
+    .results-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px 40px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .results-header {
+      text-align: center;
+      padding: 40px 0 32px;
+    }
+
+    .results-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .results-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .results-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .ranking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      transition: transform var(--transition-fast);
+    }
+
+    .ranking-item:hover {
+      transform: translateX(4px);
+    }
+
+    .ranking-position {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .ranking-position.gold {
+      background: linear-gradient(135deg, #ffd700, #ffb800);
+      color: #000;
+    }
+
+    .ranking-position.silver {
+      background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+      color: #000;
+    }
+
+    .ranking-position.bronze {
+      background: linear-gradient(135deg, #cd7f32, #b87333);
+      color: #fff;
+    }
+
+    .ranking-position.other {
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+    }
+
+    .ranking-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      background: var(--card-bg, var(--bg-secondary));
+      flex-shrink: 0;
+    }
+
+    .ranking-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ranking-name {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ranking-rounds {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .ranking-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .ranking-badge.winner {
+      background: var(--success);
+      color: #000;
+    }
+
+    .ranking-badge.finalist {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .ranking-badge.eliminated {
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+    }
+
+    .share-section {
+      margin-top: 40px;
+      padding: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .share-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .share-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .share-url {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: 'SF Mono', Monaco, monospace;
+      margin-bottom: 12px;
+      text-align: left;
+      word-break: break-all;
+    }
+
+    .btn-copy {
+      width: 100%;
+      padding: 14px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .btn-copy:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-copy:active {
+      transform: scale(0.98);
+    }
+
+    .btn-copy.copied {
+      background: var(--success);
+    }
+
+    .btn-redo {
+      padding: 12px 24px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-redo:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      opacity: 0.3;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .empty-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* Round Complete Overlay */
+    .round-complete {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-medium);
+    }
+
+    .round-complete.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .round-complete-content {
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform var(--transition-medium);
+    }
+
+    .round-complete.active .round-complete-content {
+      transform: scale(1);
+    }
+
+    .round-complete-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .round-complete-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .btn-continue {
+      padding: 16px 48px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-fast);
+    }
+
+    .btn-continue:hover {
+      transform: scale(1.02);
+    }
+
+    .btn-continue:active {
+      transform: scale(0.98);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--bg-glass);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Image Modal */
+    .image-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-medium);
+      padding: 20px;
+    }
+
+    .image-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .image-modal img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
+      transform: scale(0.9);
+      transition: transform var(--transition-medium);
+      background: var(--card-bg, var(--bg-secondary));
+    }
+
+    .image-modal.active img {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-close svg {
+      width: 24px;
+      height: 24px;
+      color: #fff;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 480px) {
+      .library-title {
+        font-size: 28px;
+      }
+
+      .polls-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .card-container {
+        max-width: 280px;
+      }
+
+      .vote-buttons {
+        gap: 60px;
+      }
+
+      .vote-btn {
+        width: 72px;
+        height: 72px;
+      }
+    }
+
+    /* Safe area for notched phones */
+    @supports (padding-top: env(safe-area-inset-top)) {
+      .header {
+        padding-top: calc(16px + env(safe-area-inset-top));
+      }
+
+      .library-content,
+      .results-content {
+        padding-bottom: calc(40px + env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Library View -->
+    <div id="library-view" class="view active">
+      <div class="header">
+        <div>
+          <div class="header-title">Rapid Fire</div>
+        </div>
+      </div>
+      <div class="library-content">
+        <div class="library-header">
+          <h1 class="library-title">Polls</h1>
+          <p class="library-subtitle">Select a design set to start voting. Your rankings can be shared when complete.</p>
+          <a href="./creator.html" class="btn-create">+ Create 1-Hour Poll</a>
+        </div>
+        <div id="polls-container" class="polls-grid">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voting View -->
+    <div id="voting-view" class="view">
+      <div class="header">
+        <button class="btn-back" onclick="showLibrary()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Polls
+        </button>
+        <div style="text-align: right;">
+          <div class="header-title" id="voting-poll-name">—</div>
+          <div class="header-subtitle" id="voting-round-info">Round 1</div>
+        </div>
+      </div>
+      <div class="voting-content">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="card-container" id="card-container">
+          <!-- Cards inserted dynamically -->
+        </div>
+        <div class="vote-buttons">
+          <button class="vote-btn pass" onclick="vote('pass')" aria-label="Pass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button class="vote-btn keep" onclick="vote('keep')" aria-label="Keep">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results View -->
+    <div id="results-view" class="view">
+      <div class="header">
+        <button class="btn-back" onclick="showLibrary()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Polls
+        </button>
+        <div style="text-align: right;">
+          <div class="header-title" id="results-poll-name">—</div>
+        </div>
+      </div>
+      <div class="results-content">
+        <div class="results-header">
+          <h1 class="results-title">Final Rankings</h1>
+          <p class="results-subtitle" id="results-subtitle">Here's how the designs ranked</p>
+        </div>
+        <div class="results-stats" id="results-stats">
+          <!-- Stats inserted dynamically -->
+        </div>
+        <div class="ranking-list" id="ranking-list">
+          <!-- Rankings inserted dynamically -->
+        </div>
+        <div class="share-section">
+          <div class="share-title">Share Results</div>
+          <div class="share-desc">Copy this link to share your rankings</div>
+          <div class="share-url" id="share-url">—</div>
+          <button class="btn-copy" id="btn-copy" onclick="copyShareUrl()">Copy Link</button>
+        </div>
+        <div style="text-align: center; margin-top: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+          <button class="btn-redo" style="width: 100%;" onclick="redoPoll()">Start Over</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round Complete Overlay -->
+    <div class="round-complete" id="round-complete">
+      <div class="round-complete-content">
+        <div class="round-complete-title" id="round-complete-title">Round Complete</div>
+        <div class="round-complete-subtitle" id="round-complete-subtitle">5 designs advancing</div>
+        <button class="btn-continue" onclick="startNextRound()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="image-modal" onclick="closeImageModal(event)">
+      <button class="modal-close" onclick="closeImageModal(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <img id="modal-image" src="" alt="Design preview">
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    
+    // Base path for your polls (relative to index.html)
+    const POLLS_BASE_PATH = './polls';
+    
+    // Load the manifest file that lists all polls
+    // You'll create this file to register your polls
+    const MANIFEST_PATH = './polls/manifest.json';
+
+    // ============================================
+    // STATE
+    // ============================================
+    
+    let state = {
+      polls: [],
+      currentPoll: null,
+      currentRound: 1,
+      currentIndex: 0,
+      roundImages: [],
+      keptImages: [],
+      allRoundResults: [], // Track which round each image was eliminated
+      isAnimating: false
+    };
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    async function init() {
+      // Check if we're viewing shared results
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedResults = urlParams.get('results');
+      const pollId = urlParams.get('poll');
+      
+      if (sharedResults && pollId) {
+        await loadPolls();
+        showSharedResults(pollId, sharedResults);
+        return;
+      }
+      
+      await loadPolls();
+      showLibrary();
+    }
+
+    async function loadPolls() {
+      try {
+        const response = await fetch(MANIFEST_PATH);
+        if (!response.ok) throw new Error('Manifest not found');
+        const manifest = await response.json();
+        state.polls = manifest.polls || [];
+        renderPollsGrid();
+      } catch (error) {
+        console.error('Error loading polls:', error);
+        renderEmptyState();
+      }
+    }
+
+    // ============================================
+    // LIBRARY VIEW
+    // ============================================
+    
+    function showLibrary() {
+      switchView('library-view');
+      // Clear URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    function renderPollsGrid() {
+      const container = document.getElementById('polls-container');
+      
+      if (state.polls.length === 0) {
+        renderEmptyState();
+        return;
+      }
+
+      container.innerHTML = state.polls.map(poll => {
+        return `
+          <div class="poll-card" onclick="openPoll('${poll.id}')">
+            <img class="poll-thumbnail" src="${poll.thumbnail || poll.images[0]}" alt="${poll.name}" onerror="this.style.display='none'">
+            <div class="poll-info">
+              <div class="poll-name">${poll.name}</div>
+              <div class="poll-count">${poll.images.length} designs</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEmptyState() {
+      const container = document.getElementById('polls-container');
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <div class="empty-title">No Polls Yet</div>
+          <div class="empty-desc">Add your first poll by creating a manifest.json file in the polls folder.</div>
+        </div>
+      `;
+    }
+
+    // ============================================
+    // VOTING VIEW
+    // ============================================
+    
+    function openPoll(pollId) {
+      const poll = state.polls.find(p => p.id === pollId);
+      if (!poll) return;
+
+      state.currentPoll = poll;
+      state.currentRound = 1;
+      state.currentIndex = 0;
+      state.roundImages = [...poll.images];
+      state.keptImages = [];
+      state.allRoundResults = poll.images.map(img => ({ image: img, eliminatedRound: null }));
+
+      // Apply poll background color
+      const bgColor = poll.backgroundColor || null;
+      if (bgColor) {
+        document.documentElement.style.setProperty('--card-bg', bgColor);
+      } else {
+        document.documentElement.style.removeProperty('--card-bg');
+      }
+
+      document.getElementById('voting-poll-name').textContent = poll.name;
+      updateRoundInfo();
+      renderCards();
+      switchView('voting-view');
+    }
+
+    function updateRoundInfo() {
+      document.getElementById('voting-round-info').textContent = 
+        `Round ${state.currentRound} · ${state.roundImages.length} remaining`;
+      
+      const progress = ((state.currentIndex) / state.roundImages.length) * 100;
+      document.getElementById('progress-fill').style.width = `${progress}%`;
+    }
+
+    function renderCards() {
+      const container = document.getElementById('card-container');
+      
+      if (state.currentIndex >= state.roundImages.length) {
+        endRound();
+        return;
+      }
+
+      const currentImage = state.roundImages[state.currentIndex];
+      const imageName = currentImage.split('/').pop().split('.')[0];
+
+      container.innerHTML = `
+        <div class="design-card" id="current-card" data-image="${currentImage}">
+          <div class="card-label pass">Pass</div>
+          <div class="card-label keep">Keep</div>
+          <img src="${currentImage}" alt="${imageName}" draggable="false">
+          <div class="card-index">${state.currentIndex + 1} of ${state.roundImages.length}</div>
+        </div>
+      `;
+
+      setupSwipeGestures();
+      updateRoundInfo();
+    }
+
+    function vote(decision) {
+      if (state.isAnimating) return;
+      state.isAnimating = true;
+
+      const card = document.getElementById('current-card');
+      const currentImage = state.roundImages[state.currentIndex];
+      
+      if (decision === 'keep') {
+        card.classList.add('swiping-right');
+        state.keptImages.push(currentImage);
+      } else {
+        card.classList.add('swiping-left');
+        // Mark as eliminated this round
+        const result = state.allRoundResults.find(r => r.image === currentImage);
+        if (result) result.eliminatedRound = state.currentRound;
+      }
+
+      setTimeout(() => {
+        state.currentIndex++;
+        state.isAnimating = false;
+        renderCards();
+      }, 300);
+    }
+
+    function endRound() {
+      // Check if we have a clear result
+      if (state.keptImages.length <= 1 || state.keptImages.length === state.roundImages.length) {
+        // End voting - either we have a winner or user kept everything
+        showResults();
+        return;
+      }
+
+      // Show round complete overlay
+      const overlay = document.getElementById('round-complete');
+      document.getElementById('round-complete-title').textContent = `Round ${state.currentRound} Complete`;
+      document.getElementById('round-complete-subtitle').textContent = 
+        `${state.keptImages.length} design${state.keptImages.length !== 1 ? 's' : ''} advancing to Round ${state.currentRound + 1}`;
+      overlay.classList.add('active');
+    }
+
+    function startNextRound() {
+      document.getElementById('round-complete').classList.remove('active');
+      
+      state.currentRound++;
+      state.roundImages = [...state.keptImages];
+      state.keptImages = [];
+      state.currentIndex = 0;
+
+      updateRoundInfo();
+      renderCards();
+    }
+
+    // ============================================
+    // SWIPE GESTURES
+    // ============================================
+    
+    function setupSwipeGestures() {
+      const card = document.getElementById('current-card');
+      if (!card) return;
+
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+      let hasMoved = false;
+
+      const handleStart = (e) => {
+        if (state.isAnimating) return;
+        isDragging = true;
+        hasMoved = false;
+        startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        currentX = startX;
+        card.style.transition = 'none';
+      };
+
+      const handleMove = (e) => {
+        if (!isDragging) return;
+        hasMoved = true;
+        currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const diff = currentX - startX;
+        const rotation = diff * 0.05;
+        
+        card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+        
+        card.classList.remove('tilting-left', 'tilting-right');
+        if (diff < -50) {
+          card.classList.add('tilting-left');
+        } else if (diff > 50) {
+          card.classList.add('tilting-right');
+        }
+      };
+
+      const handleEnd = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diff = currentX - startX;
+        card.style.transition = '';
+        card.style.transform = '';
+        
+        // Only trigger vote if user actually swiped (moved significantly)
+        if (hasMoved && diff < -100) {
+          vote('pass');
+        } else if (hasMoved && diff > 100) {
+          vote('keep');
+        } else if (!hasMoved) {
+          // It was a tap, not a drag - open modal
+          const imageSrc = card.dataset.image;
+          if (imageSrc) {
+            openImageModal(imageSrc);
+          }
+        } else {
+          card.classList.remove('tilting-left', 'tilting-right');
+        }
+      };
+
+      card.addEventListener('mousedown', handleStart);
+      card.addEventListener('touchstart', handleStart, { passive: true });
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('touchmove', handleMove, { passive: true });
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchend', handleEnd);
+    }
+
+    // ============================================
+    // RESULTS VIEW
+    // ============================================
+    
+    function showResults() {
+      const poll = state.currentPoll;
+      
+      // Build ranking based on elimination round (later = better)
+      // Kept images get the highest round number
+      state.keptImages.forEach(img => {
+        const result = state.allRoundResults.find(r => r.image === img);
+        if (result) result.eliminatedRound = state.currentRound + 1; // Winners
+      });
+
+      // Sort by elimination round (descending) - later elimination = better rank
+      const sortedResults = [...state.allRoundResults].sort((a, b) => {
+        return (b.eliminatedRound || 0) - (a.eliminatedRound || 0);
+      });
+
+      // Save results
+      saveResults(poll.id, sortedResults);
+
+      renderResults(poll, sortedResults);
+      switchView('results-view');
+    }
+
+    function showSharedResults(pollId, encodedResults) {
+      const poll = state.polls.find(p => p.id === pollId);
+      if (!poll) {
+        showLibrary();
+        return;
+      }
+
+      try {
+        const results = JSON.parse(atob(encodedResults));
+        renderResults(poll, results, true);
+        switchView('results-view');
+      } catch (error) {
+        console.error('Error parsing shared results:', error);
+        showLibrary();
+      }
+    }
+
+    function renderResults(poll, sortedResults, isShared = false) {
+      document.getElementById('results-poll-name').textContent = poll.name;
+      document.getElementById('results-subtitle').textContent = 
+        isShared ? 'Shared rankings from your reviewer' : 'Here\'s how the designs ranked';
+
+      // Stats
+      const totalRounds = Math.max(...sortedResults.map(r => r.eliminatedRound || 1));
+      const winners = sortedResults.filter(r => r.eliminatedRound === totalRounds).length;
+      
+      document.getElementById('results-stats').innerHTML = `
+        <div class="stat">
+          <div class="stat-value">${poll.images.length}</div>
+          <div class="stat-label">Total Designs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${totalRounds - 1}</div>
+          <div class="stat-label">Rounds</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${winners}</div>
+          <div class="stat-label">${winners === 1 ? 'Winner' : 'Finalists'}</div>
+        </div>
+      `;
+
+      // Rankings
+      const maxRound = Math.max(...sortedResults.map(r => r.eliminatedRound || 1));
+      const minRound = Math.min(...sortedResults.map(r => r.eliminatedRound || 1));
+      const hasRealWinner = maxRound > minRound; // Only have winners if there were multiple rounds
+      
+      document.getElementById('ranking-list').innerHTML = sortedResults.map((result, index) => {
+        const imageName = result.image.split('/').pop().split('.')[0];
+        const positionClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'other';
+        
+        let badge = '';
+        if (hasRealWinner && result.eliminatedRound === maxRound) {
+          badge = '<span class="ranking-badge winner">Winner</span>';
+        } else if (hasRealWinner && result.eliminatedRound === maxRound - 1) {
+          badge = '<span class="ranking-badge finalist">Finalist</span>';
+        } else {
+          badge = `<span class="ranking-badge eliminated">Round ${result.eliminatedRound || 1}</span>`;
+        }
+
+        return `
+          <div class="ranking-item" onclick="openImageModal('${result.image}')" style="cursor: pointer;">
+            <div class="ranking-position ${positionClass}">${index + 1}</div>
+            <img class="ranking-thumb" src="${result.image}" alt="${imageName}">
+            <div class="ranking-info">
+              <div class="ranking-name">${imageName}</div>
+              <div class="ranking-rounds">Survived ${(result.eliminatedRound || 1) - 1} round${(result.eliminatedRound || 1) - 1 !== 1 ? 's' : ''}</div>
+            </div>
+            ${badge}
+          </div>
+        `;
+      }).join('');
+
+      // Share URL
+      const shareData = btoa(JSON.stringify(sortedResults));
+      const shareUrl = `${window.location.origin}${window.location.pathname}?poll=${poll.id}&results=${shareData}`;
+      document.getElementById('share-url').textContent = shareUrl;
+      document.getElementById('btn-copy').textContent = 'Copy Link';
+      document.getElementById('btn-copy').classList.remove('copied');
+    }
+
+    function copyShareUrl() {
+      const url = document.getElementById('share-url').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btn-copy');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy Link';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function redoPoll() {
+      if (state.currentPoll) {
+        // Clear saved results
+        const key = `rapidfire_${state.currentPoll.id}`;
+        localStorage.removeItem(key);
+        // Restart the poll
+        openPoll(state.currentPoll.id);
+      }
+    }
+
+    // ============================================
+    // IMAGE MODAL
+    // ============================================
+
+    function openImageModal(imageSrc) {
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('modal-image');
+      img.src = imageSrc;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageModal(event) {
+      // Close if clicking backdrop or close button, not the image itself
+      if (event.target.id === 'image-modal' || event.target.closest('.modal-close')) {
+        const modal = document.getElementById('image-modal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // ESC key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('image-modal');
+        if (modal.classList.contains('active')) {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+    });
+
+    // ============================================
+    // LOCAL STORAGE
+    // ============================================
+    
+    function saveResults(pollId, results) {
+      const key = `rapidfire_${pollId}`;
+      localStorage.setItem(key, JSON.stringify(results));
+    }
+
+    function getSavedResults(pollId) {
+      const key = `rapidfire_${pollId}`;
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : null;
+    }
+
+    // ============================================
+    // VIEW SWITCHING
+    // ============================================
+    
+    function switchView(viewId) {
+      document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+      });
+      
+      // Small delay for animation
+      setTimeout(() => {
+        document.getElementById(viewId).classList.add('active');
+      }, 50);
+    }
+
+    // ============================================
+    // START
+    // ============================================
+    
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "polls": [
+    {
+      "id": "time-off-list-item",
+      "name": "Time-off List Item",
+      "thumbnail": "./polls/time-off-list-item/set-a-comments-bottom.png",
+      "backgroundColor": "#FCFCFC",
+      "images": [
+        "./polls/time-off-list-item/set-a-comments-bottom.png",
+        "./polls/time-off-list-item/set-a-comments-top.png",
+        "./polls/time-off-list-item/set-a-buttons-small.png",
+        "./polls/time-off-list-item/set-a-less-contained.png",
+        "./polls/time-off-list-item/set-b-date-bottom.png",
+        "./polls/time-off-list-item/set-b-date-top.png",
+        "./polls/time-off-list-item/set-b-date-top-outline.png",
+        "./polls/time-off-list-item/set-b-date-top-outline-expand-center.png",
+        "./polls/time-off-list-item/set-b-date-top-outline-expand-bottom.png",
+        "./polls/time-off-list-item/set-c-full-contained.png",
+        "./polls/time-off-list-item/set-c-partial-contained.png",
+        "./polls/time-off-list-item/set-d.png",
+        "./polls/time-off-list-item/set-e-big-text.png",
+        "./polls/time-off-list-item/set-e-medium-text.png"
+      ]
+    }
+  ]
+}

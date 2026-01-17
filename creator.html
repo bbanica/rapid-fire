@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapid Fire – Create Poll</title>
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-card: rgba(28, 28, 30, 0.8);
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --accent: #0a84ff;
+      --accent-hover: #409cff;
+      --success: #30d158;
+      --danger: #ff453a;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .back-link:hover {
+      opacity: 0.7;
+    }
+
+    h1 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .color-input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input[type="color"] {
+      width: 50px;
+      height: 44px;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: none;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .color-hex {
+      flex: 1;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: 'SF Mono', Monaco, monospace;
+      outline: none;
+    }
+
+    .color-hex:focus {
+      border-color: var(--accent);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 60px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(10, 132, 255, 0.05);
+    }
+
+    .dropzone-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      opacity: 0.5;
+    }
+
+    .dropzone-text {
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .dropzone-hint {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .image-list {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .image-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .image-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--bg-secondary);
+    }
+
+    .image-name {
+      flex: 1;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .image-remove {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-remove:hover {
+      opacity: 1;
+    }
+
+    .image-remove svg {
+      width: 18px;
+      height: 18px;
+      color: var(--danger);
+    }
+
+    .btn-generate {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 32px;
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-generate:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .success-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 20px;
+    }
+
+    .success-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .success-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .success-modal.active .success-content {
+      transform: scale(1);
+    }
+
+    .success-content h3 {
+      color: var(--success);
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .success-content > p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
+    .success-content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .success-content a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-cta {
+      display: block;
+      width: 100%;
+      padding: 14px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-cta:hover {
+      background: var(--accent-hover);
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 12px 24px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    .password-warning {
+      background: rgba(255, 214, 10, 0.15);
+      border: 1px solid rgba(255, 214, 10, 0.4);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .password-warning-title {
+      color: #ffd60a;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .password-warning-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .image-count {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="./index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      Back to Polls
+    </a>
+    <h1>Create 1-Hour Poll</h1>
+    <p class="subtitle">Upload your designs and generate a voting poll. Free hosting lasts 1 hour via Netlify Drop.</p>
+
+    <div class="form-group">
+      <label>Poll Title</label>
+      <input type="text" id="poll-title" placeholder="e.g. Homepage Hero Options">
+    </div>
+
+    <div class="form-group">
+      <label>Image Background Color</label>
+      <div class="color-input-wrapper">
+        <input type="color" id="bg-color" value="#0a0a0a">
+        <input type="text" class="color-hex" id="bg-color-hex" value="#0a0a0a" placeholder="#000000">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Design Images</label>
+      <div class="dropzone" id="dropzone">
+        <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <div class="dropzone-text">Drop images here</div>
+        <div class="dropzone-hint">or click to browse</div>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*" class="hidden">
+      <div class="image-list" id="image-list"></div>
+      <div class="image-count" id="image-count"></div>
+    </div>
+
+    <button class="btn-generate" id="btn-generate" disabled>Generate Poll</button>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal" id="success-modal">
+    <div class="success-content">
+      <h3>✓ Poll Generated!</h3>
+      <p>Your poll has been downloaded!</p>
+      <ol id="success-steps" style="text-align: left; margin: 0; padding-left: 20px; color: var(--text-secondary);">
+        <li style="margin-bottom: 8px;">Tap the button below to open Netlify Drop</li>
+        <li style="margin-bottom: 8px;">Upload your <strong>.html</strong> file</li>
+        <li style="margin-bottom: 8px;">Copy your new URL and share it!</li>
+      </ol>
+      <div class="password-warning">
+        <div class="password-warning-title">⚠️ Save the Password!</div>
+        <div class="password-warning-text">Netlify will show a password. Write it down — you'll need it to access your poll!</div>
+      </div>
+      <a href="https://app.netlify.com/drop" target="_blank" class="btn-cta">Go to Netlify Drop</a>
+      <button class="btn-secondary" id="btn-new">Create Another</button>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let images = [];
+    let lastGeneratedBlob = null;
+    let lastGeneratedName = '';
+
+    // Elements
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const imageList = document.getElementById('image-list');
+    const imageCount = document.getElementById('image-count');
+    const btnGenerate = document.getElementById('btn-generate');
+    const pollTitle = document.getElementById('poll-title');
+    const bgColor = document.getElementById('bg-color');
+    const bgColorHex = document.getElementById('bg-color-hex');
+    const successModal = document.getElementById('success-modal');
+    const btnNew = document.getElementById('btn-new');
+
+    // Color sync
+    bgColor.addEventListener('input', () => {
+      bgColorHex.value = bgColor.value;
+    });
+
+    bgColorHex.addEventListener('input', () => {
+      const hex = bgColorHex.value;
+      if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+        bgColor.value = hex;
+      }
+    });
+
+    // Dropzone
+    dropzone.addEventListener('click', () => fileInput.click());
+    
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleFiles(fileInput.files);
+    });
+
+    function handleFiles(files) {
+      for (const file of files) {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            images.push({
+              name: file.name,
+              data: e.target.result,
+              file: file
+            });
+            renderImageList();
+            updateGenerateButton();
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    }
+
+    function renderImageList() {
+      imageList.innerHTML = images.map((img, index) => `
+        <div class="image-item">
+          <img class="image-thumb" src="${img.data}" alt="${img.name}">
+          <span class="image-name">${img.name}</span>
+          <button class="image-remove" onclick="removeImage(${index})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `).join('');
+
+      imageCount.textContent = images.length > 0 
+        ? `${images.length} image${images.length !== 1 ? 's' : ''} selected`
+        : '';
+    }
+
+    function removeImage(index) {
+      images.splice(index, 1);
+      renderImageList();
+      updateGenerateButton();
+    }
+
+    function updateGenerateButton() {
+      btnGenerate.disabled = images.length < 2 || !pollTitle.value.trim();
+    }
+
+    pollTitle.addEventListener('input', updateGenerateButton);
+
+    // Generate single HTML file
+    btnGenerate.addEventListener('click', async () => {
+      const title = pollTitle.value.trim();
+      const backgroundColor = bgColorHex.value;
+      const pollId = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+      btnGenerate.disabled = true;
+      btnGenerate.textContent = 'Generating...';
+
+      try {
+        // Build manifest with embedded base64 images
+        const imageData = images.map((img, index) => ({
+          name: img.name,
+          data: img.data // Already base64 data URL
+        }));
+
+        const manifest = {
+          polls: [{
+            id: pollId,
+            name: title,
+            backgroundColor: backgroundColor,
+            thumbnail: imageData[0].data,
+            images: imageData.map(img => img.data)
+          }]
+        };
+
+        // Get the app template
+        let appHtml = await fetch('./index.html').then(r => r.text()).catch(() => null);
+        if (!appHtml) {
+          alert('Could not load app template. Make sure creator.html is in the same folder as index.html');
+          throw new Error('Missing index.html');
+        }
+
+        // Inject the manifest directly into the HTML
+        const manifestScript = `
+    <script>
+      // Embedded manifest - no fetch needed
+      window.EMBEDDED_MANIFEST = ${JSON.stringify(manifest)};
+    </script>
+  </head>`;
+        
+        appHtml = appHtml.replace('</head>', manifestScript);
+
+        // Modify the loadPolls function to use embedded manifest
+        const loadPollsOverride = `
+    async function loadPolls() {
+      try {
+        if (window.EMBEDDED_MANIFEST) {
+          state.polls = window.EMBEDDED_MANIFEST.polls || [];
+          // Hide create button in standalone polls
+          const createBtn = document.querySelector('.btn-create');
+          if (createBtn) createBtn.style.display = 'none';
+        } else {
+          const response = await fetch(MANIFEST_PATH);
+          if (!response.ok) throw new Error('Manifest not found');
+          const manifest = await response.json();
+          state.polls = manifest.polls || [];
+        }
+        renderPollsGrid();
+      } catch (error) {
+        console.error('Error loading polls:', error);
+        renderEmptyState();
+      }
+    }`;
+
+        // Replace the existing loadPolls function
+        appHtml = appHtml.replace(
+          /async function loadPolls\(\) \{[\s\S]*?renderEmptyState\(\);\s*\}\s*\}/,
+          loadPollsOverride
+        );
+
+        // Create blob and download
+        const blob = new Blob([appHtml], { type: 'text/html' });
+        lastGeneratedBlob = blob;
+        lastGeneratedName = `${pollId}-poll.html`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = lastGeneratedName;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        // Show success modal
+        successModal.classList.add('active');
+      } catch (error) {
+        console.error('Error generating poll:', error);
+        alert('Error generating poll. Please try again.');
+      }
+
+      btnGenerate.disabled = false;
+      btnGenerate.textContent = 'Generate Poll';
+      updateGenerateButton();
+    });
+
+    // Create another
+    btnNew.addEventListener('click', () => {
+      images = [];
+      pollTitle.value = '';
+      bgColor.value = '#0a0a0a';
+      bgColorHex.value = '#0a0a0a';
+      renderImageList();
+      updateGenerateButton();
+      successModal.classList.remove('active');
+      lastGeneratedBlob = null;
+      lastGeneratedName = '';
+    });
+
+    // Close modal on backdrop click
+    successModal.addEventListener('click', (e) => {
+      if (e.target === successModal) {
+        successModal.classList.remove('active');
+      }
+    });
+
+    // Close modal on ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && successModal.classList.contains('active')) {
+        successModal.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

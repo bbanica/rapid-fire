@@ -33,6 +33,36 @@
         "./polls/time-off-finalists-contextual/set-a2-buttons-small-divider.png",
         "./polls/time-off-finalists-contextual/set-c2-full-divider.png"
       ]
+    },
+    {
+      "id": "expenses-layouts",
+      "name": "Expenses layouts",
+      "thumbnail": "./polls/expenses-layouts/overlay-wide-single-column.png",
+      "backgroundColor": "#FCFCFC",
+      "images": [
+        "./polls/expenses-layouts/overlay-wide-single-column.png",
+        "./polls/expenses-layouts/overlay-wide-double-column.png",
+        "./polls/expenses-layouts/value-first-gray.png",
+        "./polls/expenses-layouts/value-first-contained-secondary.png",
+        "./polls/expenses-layouts/value-first-outlined-secondary.png",
+        "./polls/expenses-layouts/value-first-contained-primary.png",
+        "./polls/expenses-layouts/value-first-contained-primary-flipped.png",
+        "./polls/expenses-layouts/value-first-outlined-primary-flipped.png",
+        "./polls/expenses-layouts/value-first-containerless-primary-flipped.png",
+        "./polls/expenses-layouts/value-first-containerless-value-inline-with-picture.png",
+        "./polls/expenses-layouts/value-first-containerless-value-separate.png",
+        "./polls/expenses-layouts/strip-2col-left-value.png",
+        "./polls/expenses-layouts/strip-2col-right-value.png",
+        "./polls/expenses-layouts/strip-2col-left-value-waiting-top.png",
+        "./polls/expenses-layouts/strip-2col-left-value-waiting-middle.png",
+        "./polls/expenses-layouts/strip-2col-left-value-waiting-top-left.png",
+        "./polls/expenses-layouts/strip-2col-left-value-waiting-top-right.png",
+        "./polls/expenses-layouts/gallery-name-first-button-solid.png",
+        "./polls/expenses-layouts/gallery-name-first-button-text.png",
+        "./polls/expenses-layouts/gallery-value-first-details-middle.png",
+        "./polls/expenses-layouts/gallery-value-first-details-top.png"
+
+      ]
     }
   ]
 }

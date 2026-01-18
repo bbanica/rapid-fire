@@ -21,6 +21,18 @@
         "./polls/time-off-list-item/set-e-big-text.png",
         "./polls/time-off-list-item/set-e-medium-text.png"
       ]
+    },
+    {
+      "id": "time-off-finalists-contextual",
+      "name": "Time off finalists - contextual",
+      "thumbnail": "./polls/time-off-finalists-contextual/set-a2-buttons-small-contained.png",
+      "backgroundColor": "#FCFCFC",
+      "images": [
+        "./polls/time-off-finalists-contextual/set-a2-buttons-small-contained.png",
+        "./polls/time-off-finalists-contextual/set-c2-full-contained.png",
+        "./polls/time-off-finalists-contextual/set-a2-buttons-small-divider.png",
+        "./polls/time-off-finalists-contextual/set-c2-full-divider.png"
+      ]
     }
   ]
 }
